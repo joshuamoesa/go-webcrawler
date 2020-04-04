@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/anaskhan96/soup"
 	"log"
 	"net/http"
-	"net/url"	
-	"os"	
+	"net/url"
+	"os"
+
+	"github.com/anaskhan96/soup"
 )
 
 type Omdbapiretrieve struct {
@@ -42,21 +43,26 @@ type Omdbapiretrieve struct {
 }
 
 func main() {
-	resp, err := soup.Get("https://www.pathe-thuis.nl/movie/index/browse?mainURL=collectie&subURL=81&page=1&amount=30")
+	resp, err := soup.Get("https://www.pathe-thuis.nl/films/collectie/81/nieuw")
 
 	if err != nil {
 		os.Exit(1)
 	}
 	doc := soup.HTMLParse(resp)
-	grid := doc.Find("body").FindAll("a", "class", "poster")
-	for _, i := range grid {		
+	list := doc.Find("body").FindAll("li", "class", "vertical-poster-list__item")
 
-		link := i.Find("div", "class", "list-info").Find("div", "class", "teaser").Find("h4")
-		willemRating := i.Find("div", "class", "list-info").Find("div", "class", "sideinfo").Find("span", "class", "popcornmeter")		
-		
-		fmt.Println(link.Text())
-		fmt.Println("imdb: " + getImdbRating(link.Text()) + " | willem: " + willemRating.Text())
-		fmt.Println("https://pathe-thuis.nl/" + i.Attrs()["href"])
+	fmt.Println("Debug: starting for-loop...")
+
+	for _, i := range list {
+
+		movie := i.Find("a")
+		name := movie.Attrs()["data-product-name"]
+		id := movie.Attrs()["data-product-id"]
+		fmt.Println(name)
+		fmt.Println("imdb: " + getImdbRating(name))
+		//		fmt.Println("imdb: " + getImdbRating(title) + " | willem: " + willemRating.Text())
+		//fmt.Println("imdb: " + getImdbRating(title))
+		fmt.Println("https://www.pathe-thuis.nl/film/" + id)
 		fmt.Println(" ")
 	}
 }
